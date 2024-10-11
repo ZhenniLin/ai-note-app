@@ -22,14 +22,19 @@ import { Textarea } from "./ui/textarea";
 import LoadingButton from "./ui/loading-button";
 import { useRouter } from "next/navigation";
 
+// 组件接口
 interface AddNoteDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
 }
 
 const AddNoteDialog = ({ open, setOpen }: AddNoteDialogProps) => {
+  // 通过 useRouter 钩子获取 router 对象，用于在笔记提交后刷新页面
   const router = useRouter();
 
+  // 初始化表单
+  // <CreateNoteSchema> 表示类型
+  // (createNoteSchema) 表示验证模式
   const form = useForm<CreateNoteSchema>({
     resolver: zodResolver(createNoteSchema),
     defaultValues: {
@@ -38,18 +43,24 @@ const AddNoteDialog = ({ open, setOpen }: AddNoteDialogProps) => {
     },
   });
 
+  // 表单提交处理函数
+  // input参数 - 类型CreateNoteSchema
   async function onSubmit(input: CreateNoteSchema) {
     // alert(JSON.stringify(input));
     try {
       const response = await fetch("/api/notes", {
         method: "POST",
+        // 将input对象转为JSON字符串
         body: JSON.stringify(input),
       });
 
       if (!response.ok) throw Error("Status code: " + response.status);
 
+      // 重置表单
       form.reset();
+      // 刷新页面
       router.refresh();
+
       setOpen(false);
     } catch (error) {
       console.error(error);
