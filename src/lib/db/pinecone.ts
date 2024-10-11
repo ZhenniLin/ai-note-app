@@ -8,8 +8,8 @@ if (!apiKey) {
 
 const pinecone = new Pinecone({
   apiKey,
-  controllerHostUrl:
-    "https://nextjs-ai-note-app-pj169n8.svc.aped-4627-b74a.pinecone.io",
+  // controllerHostUrl:
+  //   "https://nextjs-ai-note-app-pj169n8.svc.aped-4627-b74a.pinecone.io",
 });
 
-export const notesIndex = pinecone.Index("nextjs-ai-note-app");
+export const notesIndex = pinecone.index("nextjs-ai-note-app");
