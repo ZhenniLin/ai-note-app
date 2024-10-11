@@ -1,5 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import prisma from "@/lib/db/prisma";
-import { createNoteSchema } from "@/lib/validation/note";
+import {
+  createNoteSchema,
+  deleteNoteSchema,
+  updateNoteSchema,
+} from "@/lib/validation/note";
 import { auth } from "@clerk/nextjs/server";
 
 // 接受一个参数req，表示传递过来的请求对象，类型是Request对象，它代表HTTP请求，包含请求体、请求头、请求方法等信息
@@ -36,6 +41,81 @@ export async function POST(req: Request) {
     });
     // return response
     return Response.json({ note }, { status: 201 });
+  } catch (error) {
+    console.log(error);
+    return Response.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+
+    const parseResult = updateNoteSchema.safeParse(body);
+
+    // 验证1 - data是否符合格式
+    if (!parseResult.success) {
+      console.error(parseResult.error);
+      return Response.json({ error: "Invalid input" }, { status: 400 });
+    }
+
+    const { id, title, content } = parseResult.data;
+
+    // 验证2 - data是否存在
+    const note = await prisma.note.findUnique({ where: { id } });
+    if (!note) {
+      return Response.json({ error: "Note not found" }, { status: 404 });
+    }
+
+    // 验证3 - 用户
+    const { userId } = auth();
+    if (!userId || userId != note.userId) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // 将用户put过来的data传入数据库
+    const updateNote = await prisma.note.update({
+      where: { id },
+      data: { title, content },
+    });
+    return Response.json({ updateNote }, { status: 200 });
+  } catch (error) {
+    console.log(error);
+    return Response.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const body = await req.json();
+
+    const parseResult = deleteNoteSchema.safeParse(body);
+
+    // 验证1 - data是否符合格式
+    if (!parseResult.success) {
+      console.error(parseResult.error);
+      return Response.json({ error: "Invalid input" }, { status: 400 });
+    }
+
+    const { id } = parseResult.data;
+
+    // 验证2 - data是否存在
+    const note = await prisma.note.findUnique({ where: { id } });
+    if (!note) {
+      return Response.json({ error: "Note not found" }, { status: 404 });
+    }
+
+    // 验证3 - 用户
+    const { userId } = auth();
+    if (!userId || userId != note.userId) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // 将选中的note通过id再数据库里删除
+    await prisma.note.delete({
+      where: { id },
+    });
+    return Response.json({ message: "Note deleted" }, { status: 200 });
   } catch (error) {
     console.log(error);
     return Response.json({ error: "Internal server error" }, { status: 500 });
