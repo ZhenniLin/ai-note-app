@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/notes": {
+      "maxDuration": 60
+    }
+  }
+}
