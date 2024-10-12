@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^0.0.66",
     "@clerk/nextjs": "^5.7.1",
     "@clerk/themes": "^2.1.35",
     "@hookform/resolvers": "^3.9.0",
