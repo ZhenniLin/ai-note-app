@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/notes": {
+    "api/notes/routes.ts": {
       "maxDuration": 60
     }
   }
